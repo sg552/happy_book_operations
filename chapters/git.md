@@ -1,5 +1,6 @@
 # git 入门
 
+想要完整的掌握git, 请看<<pro git>> 中文版: https://github.com/progit/progit
 
 Git 极速入门
 
