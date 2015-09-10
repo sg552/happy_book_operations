@@ -1,8 +1,6 @@
 # nginx 基础 (nginx beginners guide)
 
-2015-01-03 09:27
-分类： 技术
-master-workers process
+## master-workers process
 
 nginx包含一个master process, 多个 worker process.
 
@@ -12,12 +10,13 @@ worker就是用来处理 request的。
 
 nginx 由于使用了 event-based model, 所以处理request速度很快。
 
-日志
+## 日志
 
 一般都放在 /var/logs/nginx目录下的 access.log, error.log  ，具体要看配置文件
 
-启动，停止等命令
+## 启动，停止等命令
 
+```bash
 $ nginx -s stop # 快速停止
 
 $ nginx -s quit # 比较得体的停止
@@ -25,11 +24,13 @@ $ nginx -s quit # 比较得体的停止
 $ nginx -s reload # 重新读取配置文件（ 重启）
 
 $ nginx -s reopen # 重新打开日志
+```
 
-配置一个静态网站：
+## 配置一个静态网站：
 
 可以看出， 对于 '/images'请求，会指向到 /data 的本地目录，否则，直接指向 /data/www
 
+```
 server {
     location / {
         root /data/www;
@@ -39,10 +40,11 @@ server {
         root /data;
     }
 }
+```
+
 配置一个 Proxy:
 
-11
-
+```
 server {
     location / {
         proxy_pass http://localhost:8080/;
@@ -52,23 +54,18 @@ server {
         root /data/images;
     }
 }
+```
+
 TODO： 配置rails,  php, 查看nginx日志
 
 
-# Nginx
-
-http://siwei.me/blog/posts/nginx-nginx-content-caching
-
-nginx 对文件(动态页面) 进行缓存 ( nginx content caching)
-
-2015-01-03 15:34
-分类： 技术
-refer to: http://nginx.com/resources/admin-guide/caching/
+# nginx 对文件(动态页面) 进行缓存 ( nginx content caching)
 
 nginx可以对某个请求进行缓存，
 
 例子：
 
+```
 http {
     ...
     proxy_cache_path /data/nginx/cache keys_zone=one:10m;
@@ -80,9 +77,11 @@ http {
         }
     }
 }
+```
+
 设置好了允许缓存后，进一步可以设置它的过期时间： （iteration 如何解释。。需要动手弄一下）
 
-参与cache 过程 的，有两个角色， cache manager 和 cache loader:
+## 参与cache 过程 的，有两个角色， cache manager 和 cache loader:
 
 1. cache manager 会循环的检查 cache的状态。当它发现 缓存的文件超过了 max_size 这个数目后，就会删掉最少访问的cache page.
 
@@ -92,40 +91,56 @@ http {
 
 下面是个例子：
 
+```nginx
 proxy_cache_path /data/nginx/cache keys_zone=one:10m
                  loader_threshold=300 loader_files=200;
-指定某个URL 要缓存
+```
+
+## 指定某个URL 要缓存
 
 如果某个response来自 proxy_server, 并且request是 GET/HEAD 方法，则nginx 默认会把它做缓存.
 
 而且默认使用的key就是 url ，你也可以指定这个key, 例如：
 
+```
 proxy_cache_key "$host$request_uri$cookie_user";
+```
 
 如果我们希望某个 url 至少被请求5次之后才被缓存，就这样：
 
+```
 proxy_cache_min_uses 5;
+```
 
 如果希望对POST和 DELETE进行缓存：
 
+```
 proxy_cache_methods GET HEAD POST；
+```
 
 下面的例子：对于 200 , 302的response, 缓存 10分钟，
 
+```
 proxy_cache_valid 200 302 10m;  # 对于 200， 302，缓存10分钟
 proxy_cache_valid 404 1m;       # 缓存1分钟
 proxy_cache_valid any 10m;      # 对于所有的响应，都缓存10分钟。
+```
 
 也可以根据条件来判断是否使用cache: （ cookie 中的变量：nocache, parameter中的变量：nocache 或者 comment, 只要有一个 不是空，也不是 0, 那么这个request就不会使用cache)
 
+```
 proxy_cache_bypass $cookie_nocache $arg_nocache$arg_comment;
+```
 
 对于下面的例子：压根就不使用cache:
 
+```
 proxy_no_cache $http_pragma $http_authorization;
+```
 
 下面是一个更大的例子：
 
+```nginx
 http {
     ...
     # 定义了一个 proxy_cache_path, :
@@ -153,24 +168,32 @@ http {
         }
     }
 }
-注意: 如何调试呢?
+```
+
+## 注意: 如何调试呢?
 
 1. 要设置log format, 把日志打印出来. 例如,配置文件为: (注意其中的 $upstream_cache_status, 这个变量最重要, 从它我们可以知道, 是HIT 还是MISS )
 
+```
     log_format my_format '$remote_addr - $remote_user [$time_local]  '
       '"$request" $status $body_bytes_sent '
       '"$http_referer" "$http_user_agent" $upstream_cache_status';
 
     access_log logs/my_access.log my_format;
+```
 
 2. 要有对应的 ignore headers, 如果后端返回的结果中,增加了 cache-control (也有一说是 set-cookie) 或者 啥的,就不行了.
 
+```
 server{
             proxy_ignore_headers "cache-control";
             proxy_hide_header "cache-control";
 }
+```
+
 下面是一个完整的 nginx.conf例子;
 
+```
 http{
     # 其他内容
     proxy_cache_path /tmp/nginx_cache keys_zone=cache_one:10m
@@ -198,21 +221,31 @@ http{
     upstream rails_api{
         server localhost:3000;
     }
-缓存用的哪些文件?
+```
+
+## 缓存用的哪些文件?
 
 我们可以在 proxy_cache_path中设置, 例如:
 
+```
     proxy_cache_path /tmp/nginx_cache keys_zone=cache_one:10m
                      loader_threshold=300 loader_files=200
                      max_size=200m;
+```
+
 然后, 找到 /tmp/nginx_cache 目录, 如果某个 cache被命中过, 就会看到出现一个以md5 结果命名的文件:
 
-:/tmp/nginx_cache$ ll
+```bash
+/tmp/nginx_cache$ ll
 total 20
 drwxrwxrwx  2 nobody sg552    4096 Sep 10 11:39 ./
 drwxrwxrwt 10 root   root    12288 Sep 10 11:38 ../
 -rw-------  1 nobody nogroup   594 Sep 10 11:39 f8924891f34a941a8342ccd19c4cf290
+```
+
 上面中, 这个文件 "f89..." 就是缓存文件. 它的内容如下.
+
+```
 ���U���������Ud����0""b4945c5f2d4b62faae53f44f44a5e946"
 KEY: http://rails_api/prices/say_hi
 HTTP/1.1 200 OK
@@ -228,14 +261,13 @@ Connection: close
 Server: thin 1.6.2 codename Doc Brown
 
 time is: 2015-09-10 11:39:58 +0800
-可以看出, 该静态文件, 以文本的形式缓存了 所有的response信息.
+```
 
+可以看出, 该静态文件, 以文本的形式缓存了 所有的response信息.
 
 
 # 使用nginx 做代理, 使用 无法备案的域名
 
-2015-08-26 09:18
-分类： 技术
 其实很简单.
 
 一个例子, 我们的一个新款域名, 无法备案, 无法在国内的主机供应商上使用.
@@ -248,6 +280,7 @@ time is: 2015-09-10 11:39:58 +0800
 
 那么, 香港的nginx配置如下:
 
+```nginx
   server {
     listen       80;
    server_name  special.domain;
@@ -264,12 +297,11 @@ time is: 2015-09-10 11:39:58 +0800
       proxy_next_upstream http_502 http_504 error timeout invalid_header;
     }
   }
+```
 
 
 # nginx的debug级的日志 (nginx debugging log)
 
-2015-01-03 18:56
-分类： 技术
 refer to:  http://nginx.org/en/docs/debugging_log.html
 
 1. 默认是不带这个特性的。需要重新编译安装：
@@ -280,6 +312,7 @@ refer to:  http://nginx.org/en/docs/debugging_log.html
 error_log /path/to/log debug;
 注意，如果在下层配置文件中，重新定义了 error_log, 那么会覆盖掉上级的debug配置，例如：
 
+```nginx
 error_log /path/to/log debug;
 
 http {
@@ -287,18 +320,17 @@ http {
         error_log /path/to/log; # 这里会使上面的debug输出失效。
         error_log /path/to/log debug;  # 应该这样。
         ...
-
+```
 
 # nginx 处理 request 的过程 (how nginx processes a request)
 
-2015-01-03 15:18
-分类： 技术
 refer  to http://nginx.org/en/docs/http/request_processing.html#simple_php_site_configuration
 
-Name based virtual servers
+##  Name based virtual servers
 
 会根据request header中的 server name来配对，例如， 给定配置文件：
 
+```nginx
 server {
     listen      80;
     server_name example.org www.example.org;
@@ -316,28 +348,37 @@ server {
     server_name example.com www.example.com;
     ...
 }
+```
+
 如果我们请求   example.come/lala , 那么，就会被匹配到第三个配置项目上。
 
 如果啥也没指定，直接 localhost:80, 那么，就会被匹配到 default site上（通常是第一个）。
 
 这个是配置default site的例子：
 
+```
 server {
     listen      80 default_server;
     server_name example.net www.example.net;
     ...
 }
+```
+
 如果希望阻止用户访问 localhost:80呢？  按照下面的方式配置： （就是配置一个 server_name = ''的server)
 
+```
 server {
     listen      80;
     server_name "";
     return      444;
 }
+```
+
 再来个高级些，或者说 ”奇怪些“的功能：如何监听从 192.168.1.2 请求过来的，访问80端口的request呢？
 
 需要按照下面的方式配置：
 
+```
 server {
     listen      192.168.1.1:80;  # 监听 192.168.1.1 过来的，访问80端口的request
     server_name example.org www.example.org;
@@ -355,15 +396,15 @@ server {
     server_name example.com www.example.com;
     ...
 }
+```
 
 # nginx跟安全访问相关的几个模块(nginx security related modules)
 
-2015-01-03 10:47
-分类： 技术
 1. ngx_http_limit_conn_module
 
 用来定义某个ip或者（key)访问的次数.
 
+```
 http {
     limit_conn_zone $binary_remote_addr zone=addr:10m;
     ...
@@ -372,18 +413,24 @@ http {
         location /download/ {
             limit_conn addr 1;
         }
+```
+
 2. ngx_http_addition_module
 
 在某个request之前或者之后加上参数，
 
+```
 location / {
     add_before_body /before_action;
     add_after_body  /after_action;
 }
+```
+
 3. ngx_http_access_module
 
 对于具体的IP地址段进行控制，（使用 deny, allow 等关键字）
 
+```
 location / {
     deny  192.168.1.1;
     allow 192.168.1.0/24;
@@ -391,10 +438,13 @@ location / {
     allow 2001:0db8::/32;
     deny  all;
 }
+```
+
 4.  ngx_http_auth_request_module
 
 对访问进行控制，使用到了 sub-request（就是下面的 auth_request中所定义的 /auth )，如果sub-request返回2xx,那么整个 url就是可以访问的。否则就是不可以访问。
 
+```
 location /private/ {
     auth_request /auth;
     ...
@@ -405,25 +455,30 @@ location = /auth {
     proxy_set_header Content-Length "";
     proxy_set_header X-Original-URI $request_uri;
 }
+```
+
 5. ngx_http_auth_basic_module
 
 通过用户名-密码 文件来控制访问，比如：
 
+```
 location / {
     auth_basic           "closed site";
     auth_basic_user_file conf/htpasswd;
 }
+```
+
 而 conf/htpasswd 的内容应该是：
 
+```
 # comment
 name1:password1
 name2:password2:comment
 name3:password3
+```
 
 # nginx中 配置 中文域名 ( configure chinese domain name in nginx)
 
-2014-11-25 17:08
-分类： 技术
 refer to: http://www.92csz.com/57/853.html
 
 开始配置直接写的中文域名，但是解析不到正确的server，后来google了一把终于找到原因了，当在浏览器中敲入www.明月博客.com时，浏览器会转为www.xn--9kRq6Qw2Iu2A.com
@@ -433,9 +488,11 @@ refer to: http://www.92csz.com/57/853.html
 
 配置：
 
+```
 listen 80;
 server_name www.xn--9kRq6Qw2Iu2A.com;
 index index.html;
+```
 
 p.s. 中文域名好难看
 
@@ -445,6 +502,7 @@ p.s. 中文域名好难看
 分类： 技术
 今天修改完nginx 的配置，重启之后，发现有 3个nginx进程是这样，其他5个左右都是正常的nginx; 看起来跟下图一样： ( today I met a strange case that some of my nginx processes become "is shutting down" status. )
 
+```
 nobody 6246 6241 0 10:51 ? 00:00:00 nginx: worker process
 nobody 6247 6241 0 10:51 ? 00:00:00 nginx: worker process
 nobody 6247 6241 0 10:51 ? 00:00:00 nginx: worker process
@@ -453,51 +511,58 @@ nobody 6249 6241 0 10:51 ? 00:00:00 nginx: worker process
 nobody 7995 10419 0 Jan12 ? 00:20:37 nginx: worker process is shutting down
 nobody 7995 10419 0 Jan12 ? 00:20:37 nginx: worker process is shutting down
 nobody 7996 10419 0 Jan12 ? 00:20:11 nginx: worker process is shutting down
+```
+
 经过google, 才知道这是 nginx -s reload之后， nginx 正在平滑的重启。(graceful reboot) 。 等调用对应nginx 的进程结束之后，这个process就会重启了。 (after googling, I found that the root cause is nginx's graceful reboot. the nginx process which shoud be shut down is still responding a request, and it will restart once the current request is done )
 
 果然，大约20分钟后，这些进程都变成了 'worker process' 了。( 20 minutes later, all the nginx worker are rebooted ) o
 
 # nginx的限速相关(nginx limit download rate)
 
-2014-06-20 16:31
-分类： 技术
-CoreModule
-限速
 指令名称： limit_rate、limit_rate_after \\limit_rate_after用于设置http请求传输多少字节后开始限速
 使用环境： http, server, location, if in location
 示例：
+
+```
 location /download {
-limit_rate_after 4m;
-limit_rate 512k;
+    limit_rate_after 4m;
+    limit_rate 512k;
 }
+```
 
 限制单个IP最大连接数（线程数）
 指令名称： limit_conn_zone
 使用环境： http
 示例：
+
+```
 http {
-limit_conn_zone $binary_remote_addr zone=client_addr:10m; \\这是内存的开销
+    limit_conn_zone $binary_remote_addr zone=client_addr:10m; \\这是内存的开销
 }
+```
 
 指令名称： limit_conn
 使用环境： http, server, location
 示例：
+```
 server {
-location /download {
-limit_conn client_addr 1;
+    location /download {
+        limit_conn client_addr 1;
+    }
 }
-}
+```
 
 隐藏Nginx版本信息：
+
+```
 # curl --head http://www.tianyun.com //查看主机的响应头信息
 http{
-server_tokens off;
+    server_tokens off;
 }
+```
 
 # 在nginx转发时保留原始域名( keep the Host header via nginx proxy_pass )
 
-2014-05-07 09:41
-分类： 技术
 最近的子项目越来越多，但是只有一个域名， 在做了nginx的跳转之后， 发现原来的域名会丢失，取代出现的是IP。
 
 (with the growth of the sub-systems of my current project, there is a problem occurred: the origin domain name disappeared and it is replaced by the ip addresses , which is not liked by my workmates.  )
@@ -506,6 +571,7 @@ server_tokens off;
 
 solution is : proxy_set_header Host $http_host;
 
+```
     server {
         listen 80;
         # this is the key !!!!!
@@ -517,6 +583,7 @@ solution is : proxy_set_header Host $http_host;
             proxy_pass http://10.103.13.103:3200/interface/client/pids;
         }
         ......
+```bash
 
 # 使用 goaccess分析nginx日志（analyze Nginx log using GoAccess)
 
@@ -526,19 +593,24 @@ nginx 日志无法用rails-request-analyzer 来分析。 需要使用 goaccess �
 
 用法非常简单：  (quite simple to use)
 
+```bash
 $ goaccess -f <your_log_file> -a > result.html
+```
+
 但是goaccess的一个缺点是：  分析大日志时，如果你的机器内存太小，就会报错退出。例如，你的机器是4G内存，但是要分析的内容是7G大小，这时候就会 在机器运行2，3分钟，接近死机是，出现 Killed 的结果（还好GoAccess会自动 干掉这个进程 )  ( but it's a weakpoint that goaccess can't analyze big file, e.g. 7G size.  )
 
 所以解决办法是： 1. 把大日志切成小文件。  2. 分析小文件。
 
+```bash
 $ split -b 2G <your_log_file>
+```
 
 # 使用 nginx + thin 的配置启动 rails server. ( using nginx + thin to serve rails app)
 
 2014-04-01 09:18
 分类： 技术
 1. nginx 中做如下配置：
-
+```
      server {
          listen 80;
          charset utf-8;
@@ -557,14 +629,20 @@ $ split -b 2G <your_log_file>
             server 127.0.0.1:6663;
             server 127.0.0.1:6664;
      }
+```
+
 重启 nginx:
+
+```bash
   $ nginx -t  （测试一下配置文件）
   $ nginx -s reload
+```
+
 2. 使用 配置文件来启动 thin:
 
 2.1. 建立 /config/thin.yml , 内容如下：
 
----
+```yaml
 chdir: '/opt/app/ruby/m-cms-for-tudou/current'  #  这里需要修改。
 environment: production
 address: 0.0.0.0
@@ -578,26 +656,33 @@ require: []
 wait: 30
 servers: 4
 daemonize: true
+```
+
 2.2. 启动thin: (记得Gemfile 中要有 gem 'thin' )
 
-    $ bundle exec thin start -C config/thin.yml
-2.3. 记得在 config/environments/production.rb文件中： (以后可以使用nginx来 配置，处理静态文件。现在先这样弄着）
+```bash
+$ bundle exec thin start -C config/thin.yml
+```
 
+2.3. 记得在 `config/environments/production.rb`文件中： (以后可以使用nginx来 配置，处理静态文件。现在先这样弄着）
+
+```ruby
 Cms::Application.configure do
     config.serve_static_assets = true
 end
+```
+
 就可以了。
 
 # nginx rewrite/try_file tips(nginx rewrite/try_files 小提示）
 
-2014-03-15 18:34
-分类： 技术
 refer to: http://stackoverflow.com/questions/22032751/how-to-process-dynamic-urls-as-static-pages-using-nginx
 
 最近，一个项目的请求让我们的Rails不足以负担（300 req /seconds是我们的极限），所以我打算把它做成静态化的页面，这样在我的 2核CPU上都可以轻松跑到15000 req/s.  ( recently I am considering migrate our dynamic rails pages to static files served by Nginx which is much powerful than rails- 15k req/s v.s. 300 req/s. )
 
 于是我们的nginx 配置文件是： ( so our nginx config file looks like: )
 
+```
   server {
     listen       100;
     charset utf-8;
@@ -612,23 +697,28 @@ refer to: http://stackoverflow.com/questions/22032751/how-to-process-dynamic-url
 #      rewrite ^/popup_pages /platform-$arg_platform-product-$arg_product.json;
     }
   }
+```
 
 几个小tips: (some tips)
 
-1. 不要使用下划线。 因为nginx无法正确判断 $arg_param 中的变量。 要使用横线'-' (use '-' instead of underscore '_' in your static file names)
+1.不要使用下划线。 因为nginx无法正确判断 $arg_param 中的变量。 要使用横线'-' (use '-' instead of underscore '_' in your static file names)
 
-#      DON'T use like below, nginx could not process underscore filenames mixing up with $arg_parameter_name:
+```
+# DON'T use like below, nginx could not process underscore filenames mixing up with $arg_parameter_name:
 #      try_files /platform_$arg_platform_product_$arg_product.json /default.json?q=$uri;
-2. 尽量不要使用rewrite ，因为if is Evil ( If is evil, see: http://wiki.nginx.org/IfIsEvil )
+```
 
+2.尽量不要使用rewrite ，因为if is Evil ( If is evil, see: http://wiki.nginx.org/IfIsEvil )
+
+```
 #      Don't use rewrite ...  use try_files instead.
 #      rewrite ^/popup_pages /platform-$arg_platform-product-$arg_product.json;
-3. 调试时，可以先使用 rewrite 来调试，调试完毕后，把它改写成 try_files. 调试rewrite 时，时刻关注access.log/error.log
+```
+
+3.调试时，可以先使用 rewrite 来调试，调试完毕后，把它改写成 try_files. 调试rewrite 时，时刻关注access.log/error.log
 
 # nginx built-in variables (nginx 内置的变量)
 
-2014-03-15 17:25
-分类： 技术
 Nginx 这些变量非常有用， refer to: http://wiki.nginx.org/HttpCoreModule#.24args
 
 The core module supports built-in variables, whose names correspond with the names of variables in Apache.
@@ -638,6 +728,7 @@ First of all, there are variables which represent header lines in the client req
 Furthermore, there are other variables:
 
 $arg_PARAMETER
+
 This variable contains the value of the GET request variable PARAMETER if present in the query string
 
 $args
@@ -740,12 +831,11 @@ This variable is the current request URI, without any arguments (see $args for t
 
 # 动态web页面 的速度跟nginx服务下的静态页面的支持速度，天壤之别啊。 (dynamic pages is so slow comparing to static pages served by nginx)
 
-2014-02-23 15:31
-分类： 技术
 今天心血来潮，比较了一下静态服务器和动态WEB服务器，在同样并发下的相应速度。 前者是后者速度的50倍。 在我的机器上轻松支撑到 15K req/s, 而 使用了cache的 rails : 300 req/s. 哎。。。 (in short: nginx serving static page is 50 faster then rails server using cache)
 
 thin:
 
+```
 Concurrency Level:      1000
 Time taken for tests:   3.068 seconds
 Complete requests:      1000
@@ -757,9 +847,11 @@ Requests per second:    325.98 [#/sec] (mean)
 Time per request:       3067.652 [ms] (mean)
 Time per request:       3.068 [ms] (mean, across all concurrent requests)
 Transfer rate:          182.73 [Kbytes/sec] received
+```
 
 nginx:
 
+```
 Concurrency Level:      1000
 Time taken for tests:   0.068 seconds
 Complete requests:      1000
@@ -773,45 +865,49 @@ Requests per second:    14735.35 [#/sec] (mean)
 Time per request:       67.864 [ms] (mean)
 Time per request:       0.068 [ms] (mean, across all concurrent requests)
 Transfer rate:          5975.96 [Kbytes/sec] received
+```
 
 # nginx sub uri 转发
 
-2013-11-01 13:57
-分类： 技术
 nginx的转发非常重要，它可以让我们实现复杂的 集群。
 
 下面是个例子：
 
-46 server {
-47 listen 5000;
-48 location /client {
-49 proxy_pass http://10.103.13.103:5100/client;
-50 }
-51 location /interface/client {
-52 proxy_pass http://10.103.13.103:5100/interface/client;
-53 }
-54 location / {
-55 proxy_pass http://10.103.13.103:5118;
-56 }
-57 }
+```
+server {
+  listen 5000;
+  location /client {
+      proxy_pass http://10.103.13.103:5100/client;
+  }
+  location /interface/client {
+      proxy_pass http://10.103.13.103:5100/interface/client;
+  }
+  location / {
+      proxy_pass http://10.103.13.103:5118;
+  }
+}
+```
+
 5100, 5118分别是两个端口，跑着CLIENT 和主CMS。
 
 （注：后来我们就把这两个app放在了不同的服务器上，大大降低了系统负载，提高了app的稳定性)
 
 # 使用logrotate 为nginx日志 分卷 (rotate the nginx logs )
 
-2013-06-14 08:41
-分类： 技术
 see:  http://serverfault.com/questions/284729/nginx-log-rotation
 
-1. locate your Nginx pid file:   ( normally it's at:  /opt/nginx/logs/nginx.pid  in my Ubuntu)
+1.locate your Nginx pid file:   ( normally it's at:  /opt/nginx/logs/nginx.pid  in my Ubuntu)
 
-2. you should know this key process:
+2.you should know this key process:
 
+```bash
 # this just simply make nginx start a new log file, but NOT restart.  ( quite fast)
 kill -USR1 `cat /opt/nginx/logs/nginx.pid`
+```
+
 3. create a new file (/etc/logrotate.d/nginx)  containing this :
 
+```bash
 # nginx SIGUSR1: Re-opens the log files.
 "/opt/nginx/logs/access.log" "/opt/nginx/logs/error.log"{
   daily
@@ -826,66 +922,49 @@ kill -USR1 `cat /opt/nginx/logs/nginx.pid`
     test ! -f /opt/nginx/logs/nginx.pid || kill -USR1 `cat /opt/nginx/logs/nginx.pid`
   endscript
 }
+```
+
 4. 记住： logrotate 运行时，是有一个自己的状态记录文件的。( /var/lib/logrotate.status ) 它会在这个文件中记录好每个文件的最早时间。然后每次运行时把目标文件跟自己的表做对比。如果发现目标文件的日期超过了这个表的日期，比如一个星期，那么 logrotate 才会对它分卷。  ( keep in mind that logrotate has its own status file which is used to remember when the target file is created and determine if the target file should be rotated.  )
 
-5. 典型命令：  $logrotate -v /etc/logrotate.d/nginx   (如果你使用了 -vd 那么就仅仅是一个dry-run 预演，不会对 /var/lib/logrotate.status 生效 ) ( also remember that don't use the debug mode since it's just lead to a dry-run result and won't take effect on /var/lib/logrotate.status file )
+5. 典型命令：
+
+```bash
+$logrotate -v /etc/logrotate.d/nginx   (如果你使用了 -vd 那么就仅仅是一个dry-run 预演，不会对 /var/lib/logrotate.status 生效 ) ( also remember that don't use the debug mode since it's just lead to a dry-run result and won't take effect on /var/lib/logrotate.status file )
+```
 
 6. 把logrotate增加到你的 crontab中去。  (make it affect via crontab -e)
 
 例如：
+
+```crontab
 # in crontab editor:
 0 0 * * * logrotate -v /etc/logrotate.conf
+```
+
 p.s. 所以，想要你的改动立即生效的话，
 
-1. 先运行logrotate : $  logrotate -v /etc/logrotate.d/nginx
+1.先运行logrotate :
 
-2. 编辑 vim /var/lib/logrotate.status 把里面对应的内容，改成昨天。
-例如："/usr/local/nginx/logs/access.log" 2013-12-22
- 要改成： "/usr/local/nginx/logs/access.log" 2013-12-21
-3. 再运行： logrotate -v /etc/logrotate.d/nginx
+```bash
+$ logrotate -v /etc/logrotate.d/nginx
+```
 
-# 使用logrotate 为nginx日志 分卷 (rotate the nginx logs )
-
-2013-06-14 08:41
-分类： 技术
-see:  http://serverfault.com/questions/284729/nginx-log-rotation
-
-1. locate your Nginx pid file:   ( normally it's at:  /opt/nginx/logs/nginx.pid  in my Ubuntu)
-
-2. you should know this key process:
-
-# this just simply make nginx start a new log file, but NOT restart.  ( quite fast)
-kill -USR1 `cat /opt/nginx/logs/nginx.pid`
-3. create a new file (/etc/logrotate.d/nginx)  containing this :
-
-# nginx SIGUSR1: Re-opens the log files.
-"/opt/nginx/logs/access.log" "/opt/nginx/logs/error.log"{
-  daily
-  rotate 7
-  dateext
-  copytruncate
-  missingok
-  notifempty
-  delaycompress
-  sharedscripts
-  postrotate
-    test ! -f /opt/nginx/logs/nginx.pid || kill -USR1 `cat /opt/nginx/logs/nginx.pid`
-  endscript
-}
-4. 记住： logrotate 运行时，是有一个自己的状态记录文件的。( /var/lib/logrotate.status ) 它会在这个文件中记录好每个文件的最早时间。然后每次运行时把目标文件跟自己的表做对比。如果发现目标文件的日期超过了这个表的日期，比如一个星期，那么 logrotate 才会对它分卷。  ( keep in mind that logrotate has its own status file which is used to remember when the target file is created and determine if the target file should be rotated.  )
-
-5. 典型命令：  $logrotate -v /etc/logrotate.d/nginx   (如果你使用了 -vd 那么就仅仅是一个dry-run 预演，不会对 /var/lib/logrotate.status 生效 ) ( also remember that don't use the debug mode since it's just lead to a dry-run result and won't take effect on /var/lib/logrotate.status file )
-
-6. 把logrotate增加到你的 crontab中去。  (make it affect via crontab -e)
+2.编辑 vim /var/lib/logrotate.status 把里面对应的内容，改成昨天。
 
 例如：
-# in crontab editor:
-0 0 * * * logrotate -v /etc/logrotate.conf
-p.s. 所以，想要你的改动立即生效的话，
 
-1. 先运行logrotate : $  logrotate -v /etc/logrotate.d/nginx
+```
+"/usr/local/nginx/logs/access.log" 2013-12-22
+```
 
-2. 编辑 vim /var/lib/logrotate.status 把里面对应的内容，改成昨天。
-例如："/usr/local/nginx/logs/access.log" 2013-12-22
- 要改成： "/usr/local/nginx/logs/access.log" 2013-12-21
-3. 再运行： logrotate -v /etc/logrotate.d/nginx
+要改成：
+
+```
+"/usr/local/nginx/logs/access.log" 2013-12-21
+```
+
+3. 再运行：
+
+```
+$ logrotate -v /etc/logrotate.d/nginx
+```
