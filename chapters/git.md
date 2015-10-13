@@ -42,6 +42,8 @@ git 的典型工作过程是；
 
 - pull
 
+- 合并冲突 TODO
+
 ## Git 极速入门
 
 这里非常不错： http://www.lovecloud.info/index.php/2010/02/08/%E6%9C%80%E8%BF%91%E5%AD%A6%E5%88%B0%E7%9A%84%E5%87%A0%E4%B8%AAgit%E7%9A%84%E7%94%A8%E6%B3%95/
@@ -149,14 +151,11 @@ $ git apply <path_file >
 git cherry-pick <commit id>
 ```
 
-
 例如：
 ```bash
 $ git checkout old_cc
 $ git cherry-pick 38361a68     # 这个 38361a68 号码，位于：
 ```
-
-
 
 ```bash
 $ git log
@@ -165,32 +164,57 @@ Author: Siwei Shen <siwei.shen@focusbeijing.com>
 Date:   Sat Dec 10 00:09:44 2011 +0800
 ```
 
-1. 如果顺利，就会正常提交。结果：
+如果顺利，就会正常提交。结果：
 
+```bash
 Finished one cherry-pick.
 # On branch old_cc
 # Your branch is ahead of 'origin/old_cc' by 3 commits.
+```
 
-2. 如果在cherry-pick 的过程中出现了冲突
+如果在cherry-pick 的过程中出现了冲突
 
+```
 Automatic cherry-pick failed.  After resolving the conflicts,
 mark the corrected paths with 'git add <paths>' or 'git rm <paths>'
 and commit the result with:
 
-        git commit -c 15a2b6c61927e5aed6718de89ad9dafba939a90b
+git commit -c 15a2b6c61927e5aed6718de89ad9dafba939a90b
+```
 
-就跟普通的冲突一样，手工解决：
+那么我们就当它跟普通的冲突一样，手工解决：
 
-2.1 $ git status    # 看哪些文件出现冲突
+2.1看哪些文件出现冲突
+```bash
+$ git status
 
 both modified:      app/models/user.rb
+```
 
-2.2 $ vim app/models/user.rb  # 手动解决它。
-2.3 $ git add app/models/user.rb
-2.4 git commit -c <新的commit号码>
+2.2手动解决它。
 
-## 一点点git的分支知识（more about git branch )
+```bash
+$ vim app/models/user.rb
+```
+
+2.3
+
+```bash
+$ git add app/models/user.rb
+```
+
+2.4
+
+```bash
+git commit -c <新的commit号码>
+```
+
 ## 分支的知识( git branch)
+
+### 查看所有的分支
+
+所有以 "remotes/"开头的分支，都是远程的分支。
+`* master`表示 当前的分支是 master.
 
 ```bash
 $ git branch -a
@@ -203,13 +227,61 @@ sg552@youku:/sg552/workspace/m-cms$ git branch -a
   remotes/origin/master
   remotes/origin/siwei_branch
 ```
+上面的 `origin/HEAD -> origin/master`表示 默认的分支就是`origin/master`.
 
-我很好奇， `origin/HEAD` 和 `origin/master` 都是啥，两者有啥关系。
-搜索了一下，发现： `origin/HEAD`是默认的 checkout 分支。
-HEAD-> master 表示 默认的分支就是`origin/master`.
+显示本地和远程的origin 上的分支情况
 
-命令： `git remote show origin` 可以显示本地和远程的origin 上的分支情况
+### 新建分支
 
+```bash
+$ git branch new_branch
+$ git branch -a
+# 结果是：
+* master
+  new_branch
+```
+
+### 切换分支
+
+```bash
+$ git checkout new_branch
+```
+
+### 在新的分支上操作代码
+
+跟普通的操作一模一样。
+
+可以认为是两套不同的代码。 他们有相同的基础。
+
+### merge : 在两个不同的分支间操作commit
+
+比如，我们把 branch1 中的 commit1.1 放到branch2 上：
+
+```bash
+$ git checkout branch2
+$ git merge branch1
+Updating e4b924e..df5529b
+Fast-forward
+ file1 | 3 +++
+ 1 file changed, 3 insertions(+)
+```
+然后，我们再
+
+```bash
+$ git log
+```
+就能看到， 原来位于 branch1 中的 commit 1.1 来到了branch2 上。
+
+
+### 删掉分支
+
+下面的操作，删掉了 "new_branch" 这个分支。
+```bash
+$ git branch -d new_branch
+Deleted branch new_branch (was e4b924e)
+```
+
+### 显示git push/fetch/pull等的细节。
 
 ```bash
 sg552@youku:/sg552/workspace/m-cms$ git remote show origin
