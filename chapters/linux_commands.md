@@ -1,7 +1,79 @@
+# Linux的文件系统
+# Linux的用户和用户组
+# Linux下的进程, cpu, 内存, 硬盘, 网络
+
 # linux下的常用命令 ( widely used linux commands)
+
+## 入门
+linux下的命令，都可以通过 -h 或者 --help 或者 man 来查看细节，例如：
+
+```bash
+$ git -h
+$ git --help
+$ man git
+```
+
+一般说来， `-h` 与 `--help`都是比较简洁的帮助信息，而`man <command>`给出
+的都是非常系统的文档（很厚的一本书）
+
+所以，大家遇到有趣、有用的命令时，最好自己看一眼它的文档。这样就能不断地提高。
+
+另外，linux下的命令组成都是：
+
+```
+$ <命令> <参数> <目标名>
+```
+
+这样的模式。 而参数一般都是 `-h` 或者 `--help`，可以是一个横杠，也可以是两个，在Mac
+下面<参数>必须在<目标>前面，在Linux中则前后都无所谓。
+
+所谓的命令行，也叫 shell, bash, zsh , terminal  等等，基本认为是一样的。详细的说，
+就是：TODO
+
+
+## shell 下的特殊的符号
+
+- ~ 表示当前用户的home目录, 例如 `cd ~`
+- - 表示前一个目录, 例如 `cd -`
+- . 表示当前目录, 例如 `ls .`
+- .. 表示上一层目录
+- `$ ls` 表示在命令行下执行 "ls" 这个命令
+- | 表示 pipe， 例如： `ls | grep a` ，先执行 ls, 然后在`ls`的结果中搜索"a"
+- > 表示 写入信息，例如： `echo hihihi > file3` 把 "hihihi"这个本应由"echo"
+命令输出的字符串写入到 "file3"中。
 
 ## ls
 
+列出当前目录下的文件。
+```
+$ ls
+file1 file2
+```
+
+查看当前目录下所有的文件，并且给出比较详细的信息：
+
+```
+$ ls -al
+total 16
+drwxr-xr-x   5 sg552  wheel  170 10 13 15:13 .
+drwxr-xr-x  10 sg552  wheel  340 10 13 15:15 ..
+drwxr-xr-x  14 sg552  wheel  476 10 13 15:13 .git
+-rw-r--r--   1 sg552  wheel   28 10 13 15:13 file1
+-rw-r--r--   1 sg552  wheel    8 10 13 11:30 file2
+```
+
+在当前目录下，从旧到新的列出所有的文件： (注意参数： trh)
+```
+$ ls -altrh
+total 16
+-rw-r--r--   1 sg552  wheel     8B 10 13 11:30 file2
+-rw-r--r--   1 sg552  wheel    28B 10 13 15:13 file1
+drwxr-xr-x  14 sg552  wheel   476B 10 13 15:13 .git
+drwxr-xr-x   5 sg552  wheel   170B 10 13 15:13 .
+drwxr-xr-x  10 sg552  wheel   340B 10 13 15:15 ..
+```
+
+```
 
 ## mkdir -p
 ## top
