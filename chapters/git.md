@@ -209,6 +209,36 @@ $ git add app/models/user.rb
 git commit -c <新的commit号码>
 ```
 
+## 恢复做过的改动
+
+## 取消上一次提交？
+$ git reset --soft HEAD~1
+
+`--soft` 表示把当前git的状态（假设是干净的），还原成“产生了改动，保留在待提交区“中。
+`HEAD~1` 表示最新的一个提交。
+
+```bash
+Changes to be committed:
+
+modified:   .gitignore
+```
+
+继续，我们把修改的文件，从“待提交列表”放回到普通状态：
+
+```bash
+$ git reset HEAD .gitignore
+Unstaged changes after reset:
+M .gitignore
+Changes not staged for commit:
+  modified:   .gitignore
+```
+
+我们可以继续把它的改动恢复：
+
+```bash
+$ git checkout -- .gitignore
+```
+
 ## 分支的知识( git branch)
 
 ### 查看所有的分支
