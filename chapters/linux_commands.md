@@ -30,6 +30,7 @@ $ <命令> <参数> <目标名>
 所谓的命令行，也叫 shell, bash, zsh , terminal  等等，基本认为是一样的。详细的说，
 就是：TODO
 
+说明：Mac也是Unix, 所以大多数的命令与Linux相同。
 
 ## shell 下的特殊的符号
 
@@ -75,16 +76,111 @@ drwxr-xr-x  10 sg552  wheel   340B 10 13 15:15 ..
 
 ```
 
-## mkdir -p
+## mkdir
+
+新建一个目录：
+```bash
+$ mkdir my_folder
+```
+
+也可以一股脑建立多层文件夹：
+
+```bash
+$ mkdir a/b/c/d/e/f -p
+```
+
 ## top
-## ps aux --sort rss
-## df -kh    查看分区大小
-## du . -kh  查看文件夹大小
+查看当前的系统（CPU, 内存，进程）状态。
+
+```bash
+$ top
+```
+
+进入界面后，默认按照CPU，内存排序。
+
+按“1”就能看到CPU中的每个core的负载，
+按"c" 就能看到每个进程所对应的具体的命令。
+按回车可以立刻刷新状态。
+这个命令用好了相当有用。可以找到当前最消耗CPU的进程。然后看它是否正常。
+
+## ps
+
+查看系统的进程。也是绝对重要的命令，可以非常直观地了解到当前服务器的内存使用状态。
+
+列出系统中的所有名字中带有 "thin"的进程：
+```bash
+$ ps -ef | grep thin
+```
+
+显示出系统中的所有进程，并且以消耗的内存来从低到高的排序。
+```bash
+$ ps aux --sort rss
+```
+
+## df
+查看当前服务器的所有分区，并且以用户
+
+```bash
+$ df -kh
+```
+
+## du
+查看当前文件夹的大小
+
+```bash
+$ du . -kh  查看文件夹大小
+```
+
 ## ln -s
-## kill -9
-## crontab -e
-## vim /etc/nginx 下面的东东
+新建一个soft link (软连接)。可以认为它就是windows中的快捷方式
+
+## kill
+终止某个进程。
+例如： 某个进程的id是3366
+
+```bash
+$ kill -9 3366
+```
+
+这里务必使用 "-9" 参数。表示终止。还有其他的参数形式（在kill命令中叫signal），
+具体请自行查看文档。
+
+## crontab
+
+crontab 是定时执行任务的工具。 我们需要使用下面命令进入到编辑页面：
+
+```bash
+$ crontab -e
+```
+
+TODO crontab的格式。
+
 ## tail
+
+查看某个文件的尾部。 例如：
+
+```bash
+$ tail /var/log/system.log
+```
+
+默认显示文件的最后10行。
+
+可以跟踪显示某个文件的尾部：
+```bash
+$ tail -f /var/log/system.log
+```
+
+可以指定显示该文件的尾部100行：
+```bash
+$ tail -n 100 /var/log/system.log
+```
+
+最常见的用法：跟grep 共同使用, 例如，实时跟踪显示某个文件，只过滤出内容中带有ERROR：
+
+```bash
+$ tail -f /var/log/system.log | grep ERROR
+```
+
 ## head
 ## grep *** 重中之重啊。 一定要知道各种形式的参数， 以及各种变种。 比如：   $ grep -F 'fixed string' -R --include=*rb
 ## zgrep 搜索 压缩文件的内容
