@@ -26,7 +26,8 @@
   * [Git基础](chapters/git.md)
 * [编辑器基础](chapters/eclipse.md)
   * [Vim](chapters/vim.md)
-* [数据库与检索]
-  * [MySQL]
-  * [MongoDB]
-  * [全文检索elastic search](chapters/elastic.md)
+* [数据库与检索](chapters/database_related.md)
+  * [MySQL](chapters/mysql.md)
+  * [NoSQL数据库: MongoDB](chapters/nosql.md)
+  * [NoSQL数据库: Redis](chapters/redis.md)
+  * [全文检索elastic search](chapters/elastic_search.md)
