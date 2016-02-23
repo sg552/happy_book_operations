@@ -1,4 +1,4 @@
-# Nginx
+# nginx
 
 nginx (读作 [engine x]是 HTTP 服务器, 也是多种代理(reverse proxy, mail, TCP等) 服务器。)
 作者是 Igor Sysoev, 一位俄罗斯人。最初 nginx 被广泛用于俄罗斯的各种大型网站。截止
@@ -49,8 +49,8 @@ Ubuntu下,Apache的配置步骤：
 - 新建站点的配置文件： /etc/apache2/sites-enabled/my_site.conf
 ```xml
 <VirtualHost *:80>
-  ServerName localhost
-  DocumentRoot "/my/html_files"
+    ServerName localhost
+    DocumentRoot "/my/html_files"
 </VirtualHost>
 ```
 - 新建对端口的监听文件： /etc/apache2/ports.conf
@@ -63,9 +63,9 @@ Listen 80
 - 新建站点的配置文件：  /etc/nginx/sites-enabled/my_site.conf
 ```nginx
 server {
-  listen 80;
-  server_name localhost;
-  root "/my/html_files";
+    listen 80;
+    server_name localhost;
+    root "/my/html_files";
 }
 ```
 

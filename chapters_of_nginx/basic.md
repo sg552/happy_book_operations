@@ -1,26 +1,61 @@
-# 基本功能
+# 基础
 
-- 配置站点
-- 处理请求
+## 安装
 
+Nginx 可以安装多种操作平台上。你可以运行在windows,mac上玩一玩，但是实际要用的话，都是
+运行在Linux上的。
 
-# nginx 基础
+- Linux下的安装：
+
+从源代码编译：
+
+```
+$ wget http://nginx.org/download/nginx-1.9.11.tar.gz
+$ tar zxvf nginx-1.9.11.tar.gz
+$ cd nginx-1.9.11
+$ ./configure --prefix=/opt/app/nginx
+$ make && make install
+```
+
+或者在ubuntu下，直接
+
+```
+$ sudo apt-get install nginx
+```
+
+一般说来，在源代码编译最好，可以打开很多默认关闭的功能。
+
+- Mac下的安装：
+
+```
+$ brew install nginx
+```
+
+## 使用
 
 ## 配置一个静态网站：
 
-可以看出， 对于 '/images'请求，会指向到 /data 的本地目录，否则，直接指向 /data/www
+需要加上 listen, location, root等属性。
+
+下面的例子中，对于'/images'请求，nginx会指向到 `/data` 的本地目录，否则，直接指向
+`/data/www`:
 
 ```
 server {
-    location / {
-        root /data/www;
-    }
+    listen 80;
 
     location /images/ {
-        root /data;
+        root /workspace/test_nginx/images;
     }
+
+    location / {
+        root /workspace/test_nginx/www;
+    }
+
 }
 ```
+
+
 
 配置一个 Proxy:
 
