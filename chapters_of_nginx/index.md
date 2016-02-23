@@ -9,7 +9,7 @@ nginx: 16%, 其他: 20%)
 
 官方网站：http://nginx.org
 
-在本章， "HTTP服务器"也被简称为“服务器”或者“server“
+在本章， "HTTP服务器"也被简称为“服务器”或者“server“, 截止2016年2月，最新版本是1.9.11.
 
 ## 与其他HTTP 服务器的对比
 
@@ -49,28 +49,27 @@ Ubuntu下,Apache的配置步骤：
 - 新建站点的配置文件： /etc/apache2/sites-enabled/my_site.conf
 ```xml
 <VirtualHost *:80>
-   ServerName localhost
-   DocumentRoot "/my/html_files"
+  ServerName localhost
+  DocumentRoot "/my/html_files"
 </VirtualHost>
 ```
-- 新建对端口的监听文件：
+- 新建对端口的监听文件： /etc/apache2/ports.conf
 ```xml
-NameVirtualHost *:8808
-Listen 8808
+NameVirtualHost *:80
+Listen 80
 ```
 
 在Ubuntu下，nginx的配置步骤：
 - 新建站点的配置文件：  /etc/nginx/sites-enabled/my_site.conf
-
 ```nginx
 server {
   listen 80;
   server_name localhost;
-  root "/my/html_files"
+  root "/my/html_files";
 }
 ```
 
-可以看出， apache中对接口的监听文件，完全就没有必要存在。这种叫做“废代码(boilerplate code”。
-在apache中，同样的“废代码”随处可见。
+可以看出， apache中对80端口的监听文件，完全就没有必要存在。
+这种叫做“废代码(boilerplate code)”, 在apache中，同样的“废代码”随处可见。
 
 nginx的废代码更少，表达更加直观，这也是我们使用nginx的原因之一。

@@ -3,3 +3,4 @@ _book/
 *.swo
 .DS_Store
 *.md~
+*.zip
