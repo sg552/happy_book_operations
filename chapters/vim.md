@@ -127,3 +127,20 @@ JBuilder, Visual Studio, Sublime 等.
 - 快速的跳到该行最前：  0
 - 上一次编辑的地方：  g;
 - 下一次编辑的地方：  g,
+- 返回到上一个打开的文件： ctrl + o
+- 前进到后一个打开的文件： ctrl + i
+- 光标移动到某个文件名之后，调到对应的文件： gf
+
+
+我个人配置的插件的快捷键：
+
+- ctrl + t 快速打开 ， 输入 **/vim 就能打开所有文件名中包含vim 的文件
+- ctrl + e 打开的历史文件记录
+- Gsearch  全局搜索，并且有替换的功能，
+- ctrl + c rails项目中，调到对应的controller
+- ctrl + v rails项目中，调到对应的view
+- ctrl + m rails项目中，调到对应的model
+- ctrl + u rails项目中，调到对应的controller spec. (测试文件)
+- ,a   打开历史的复制列表。
+- ,cb  把选中的行给注释掉。
+- ,t   打开左侧菜单。
