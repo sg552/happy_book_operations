@@ -36,6 +36,7 @@
 * [版本控制SCM](chapters/scm.md)
   * [SVN](chapters/svn.md)
   * [Git基础](chapters/git.md)
+  * [Git高级知识](chapters/git_advanced.md)
   * [GitHub](chapters/github.md)
 * [编辑器基础](chapters/eclipse.md)
   * [Vim](chapters/vim.md)

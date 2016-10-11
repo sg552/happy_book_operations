@@ -109,6 +109,18 @@ git push origin my_local_branch:lily
 
 提交之后远程就会出现了一个"lily"分支。
 
+git push new_source master:lily
+Total 0 (delta 0), reused 0 (delta 0)
+To https://git.coding.net/sweetysoft/happy_book_test.git
+ * [new branch]      master -> lily
+192:happy_book_operations Andrew$ git branch -a
+* master
+  remotes/new_source/lily
+  remotes/new_source/master
+  remotes/origin/HEAD -> origin/master
+  remotes/origin/master
+
+
 ## apply patch
 
 最好在linux环境下。如果出现的诡异的 /dev/null问题，
