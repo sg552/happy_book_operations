@@ -1,10 +1,14 @@
 # Linux的文件系统
+
 # Linux的用户和用户组
+
 # Linux下的进程, cpu, 内存, 硬盘, 网络
 
 # linux下的常用命令 ( widely used linux commands)
 
 ## 入门
+
+
 linux下的命令，都可以通过 -h 或者 --help 或者 man 来查看细节，例如：
 
 ```bash
@@ -17,6 +21,16 @@ $ man git
 的都是非常系统的文档（很厚的一本书）
 
 所以，大家遇到有趣、有用的命令时，最好自己看一眼它的文档。这样就能不断地提高。
+
+-h: 最少
+--help   比-h 稍微多些， 但还是很少
+man： 最多，
+
+git -h
+
+
+git --help
+man git
 
 另外，linux下的命令组成都是：
 

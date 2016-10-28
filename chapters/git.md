@@ -26,23 +26,30 @@ git 的典型工作过程是；
 
 - branch: 代码的分支。 在本地可以有，在远程也可以有。
 
-- commit: 每次的代码的提交。每个commit 都对应一个40位的字符串，例如`e4b924e3e0c03a6d71effc3bc3075c2596c14cf3`
+- commit: 每次的代码的提交。应该对应着某一个bug的修复, 或者对应 某个新增的功能.
+每个commit 在git中都用40位的字符串来表示，例如`e4b924e3e0c03a6d71effc3bc3075c2596c14cf3`
+每次提交的时候,必须有log. 例如: "增加了某某功能".
+commit 是保存在本地的.
 
-- staging area: 每次代码在被 git add/rm 之后，都会被放到一个“待提交的区域”,
+- staging area: 待提交的区域.  每次代码在被 git add/rm 之后，都会被放到这里.
 这里的代码只是一个“待提交状态”。只有在 git commit 之后，本地的git系统才会
 认为有一个专门的commit 号 对应刚才提交的代码。
 
 - cherrypick:
+(不用学)  在任意的 时间线上, 把任意一个 "不连贯"的 commit , 合并过来. 例如,
 
 - rebase
+(不用学) 破坏时间线.
 
-- merge
+- merge 合并. 如果对于同样一个文件, 本地有修改, 远程也有修改, 那么 在pull 的时候,
+如果无法自动合并, git 就会提示, 不知道如何合并. 需要人肉手工做.
 
-- push
+- push 把本地的新增的commit, 放到远程.  (让其他同事使用)
 
-- pull
+- pull 把远程新增的commit(往往是其他同事的提交的代码), 放到本地.
 
-- 合并冲突 TODO
+- 合并冲突 对于某些修改, 如果 两个不同的人, 修改了同个文件的同一行, 那么git 就无法自动合并.
+(因为git是把每一行作为一个最小单位)  所以这个时候,就要人肉的合并冲突.
 
 ## Git 极速入门
 
@@ -51,6 +58,327 @@ git 的典型工作过程是；
 基本步骤是：
 
 ## 获取最新代码  git pull
+
+## merge.
+
+
+1. 在github上创建仓库
+
+
+2. 在本地创建仓库
+
+cool@cool:/workspace$ mkdir git_test
+cool@cool:/workspace$ cd git_test/
+cool@cool:/workspace/git_test$ git init .
+Initialized empty Git repository in /workspace/git_test/.git/
+cool@cool:/workspace/git_test$
+
+3. 把本地的代码 先push 到远程:
+
+todo 若干图片.
+```
+cool@cool:/workspace/git_test$ git status
+On branch master
+
+Initial commit
+
+nothing to commit (create/copy files and use "git add" to track)
+cool@cool:/workspace/git_test$ vim apple.rb
+cool@cool:/workspace/git_test$ git status
+On branch master
+
+Initial commit
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+	apple.rb
+
+nothing added to commit but untracked files present (use "git add" to track)
+cool@cool:/workspace/git_test$ git add .
+cool@cool:/workspace/git_test$ git status
+On branch master
+
+Initial commit
+
+Changes to be committed:
+  (use "git rm --cached <file>..." to unstage)
+
+	new file:   apple.rb
+
+cool@cool:/workspace/git_test$ git commit -m '第一次的提交'
+
+*** Please tell me who you are.
+
+Run
+
+  git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"
+
+to set your account's default identity.
+Omit --global to set the identity only in this repository.
+
+fatal: unable to auto-detect email address (got 'cool@cool.(none)')
+cool@cool:/workspace/git_test$ git config --global  user.email  "330469102@qq.com"
+cool@cool:/workspace/git_test$ vim
+cool@cool:/workspace/git_test$ git config --global  user.name "yuancheng"
+cool@cool:/workspace/git_test$ vim
+cool@cool:/workspace/git_test$ git commit -m '第一次提交'
+[master (root-commit) 0995254] 第一次提交
+ 1 file changed, 6 insertions(+)
+ create mode 100644 apple.rb
+cool@cool:/workspace/git_test$ git status
+On branch master
+nothing to commit, working directory clean
+cool@cool:/workspace/git_test$ git log
+commit 099525404b46a0203f82acb3c183923ba13558a0
+Author: yuancheng <330469102@qq.com>
+Date:   Fri Oct 28 10:33:01 2016 +0800
+
+    第一次提交
+cool@cool:/workspace/git_test$ git push origin master
+fatal: 'origin' does not appear to be a git repository
+fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+and the repository exists.
+cool@cool:/workspace/git_test$ git push -u origin master
+fatal: 'origin' does not appear to be a git repository
+fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+and the repository exists.
+cool@cool:/workspace/git_test$ git remote add origin https://github.com/fodcool/my_git_test.git
+cool@cool:/workspace/git_test$ cat .git/config
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+[remote "origin"]
+	url = https://github.com/fodcool/my_git_test.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+cool@cool:/workspace/git_test$ git branch -a
+* master
+cool@cool:/workspace/git_test$ git push origin master
+Username for 'https://github.com': ^C
+cool@cool:/workspace/git_test$ ^C
+cool@cool:/workspace/git_test$ git push origin master:master
+Username for 'https://github.com': cool22336
+Password for 'https://cool22336@github.com':
+cool@cool:/workspace/git_test$ git push origin master:master
+Username for 'https://github.com': fodcool
+Password for 'https://fodcool@github.com':
+Counting objects: 3, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (2/2), done.
+Writing objects: 100% (3/3), 273 bytes | 0 bytes/s, done.
+Total 3 (delta 0), reused 0 (delta 0)
+To https://github.com/fodcool/my_git_test.git
+ * [new branch]      master -> master
+cool@cool:/workspace/git_test$ git branch -a
+* master
+  remotes/origin/master
+cool@cool:/workspace/git_test$ git log
+commit 099525404b46a0203f82acb3c183923ba13558a0
+Author: yuancheng <330469102@qq.com>
+Date:   Fri Oct 28 10:33:01 2016 +0800
+
+    第一次提交
+
+
+```
+
+
+假设远程有个 小李的同学,推送了一个修改:
+
+在同个文件(apple.rb )中的第二行,也加上自己的修改信息:
+
+
+
+小王, git pull , 会发现冲突:
+
+```
+cool@cool:/workspace/git_test$ git pull origin master
+From https://github.com/fodcool/my_git_test
+ * branch            master     -> FETCH_HEAD
+Auto-merging apple.rb
+CONFLICT (content): Merge conflict in apple.rb
+Automatic merge failed; fix conflicts and then commit the result.
+
+```
+
+小王这个时候, pull的操作,只是执行了 `fetch`, 还没有merge:
+
+
+```
+cool@cool:/workspace/git_test$ git log
+commit 2320e1eec1bad5f8e1da23278a6a9582b4278aba
+Author: yuancheng <330469102@qq.com>
+Date:   Fri Oct 28 10:39:34 2016 +0800
+
+    第二行加上了 作者信息
+
+commit 099525404b46a0203f82acb3c183923ba13558a0
+Author: yuancheng <330469102@qq.com>
+Date:   Fri Oct 28 10:33:01 2016 +0800
+
+    第一次提交
+```
+
+我们输入 status:
+
+```
+cool@cool:/workspace/git_test$ git status
+On branch master
+You have unmerged paths.
+  (fix conflicts and run "git commit")
+
+Unmerged paths:
+  (use "git add <file>..." to mark resolution)
+
+	both modified:   apple.rb
+```
+
+编辑 apple.rb
+
+```
+
+<<<<<<< HEAD
+# 这是一个Apple类
+# 作者小王
+=======
+#
+# 我是小李
+>>>>>>> e994603b36330cdafb81482aa1a67de8834b4ade
+class Apple
+
+  def color
+    return "red"
+  end
+end
+```
+
+上面的 HEAD 和 === 之间,表示的是 本地的commit的内容.
+==== 和 e9946 之间, 表示的是 远程的 commit 的内容.
+
+我们就可以人肉修改了:
+
+```
+
+# 这是一个Apple类
+# 作者: 小王和小李
+class Apple
+
+  def color
+    return "red"
+  end
+end
+```
+
+修改完之后, 我们还要告诉 git, 我们修改好了这个文件, 否则 git会一直把这个文件标记成 `both modified`.
+
+```
+
+cool@cool:/workspace/git_test$ git status
+On branch master
+You have unmerged paths.
+  (fix conflicts and run "git commit")
+
+Unmerged paths:
+  (use "git add <file>..." to mark resolution)
+
+	both modified:   apple.rb
+```
+我们要告诉git, 已经修改好了这个文件(就是使用最普通的 git add /commit)
+```
+no changes added to commit (use "git add" and/or "git commit -a")
+cool@cool:/workspace/git_test$ git add apple.rb
+cool@cool:/workspace/git_test$ git status
+On branch master
+All conflicts fixed but you are still merging.
+  (use "git commit" to conclude merge)
+
+Changes to be committed:
+
+	modified:   apple.rb
+```
+
+```
+cool@cool:/workspace/git_test$ git commit -m "人肉做了合并"
+[master fb957de] 人肉做了合并
+```
+
+$ git status 可以查看下当前的状态.
+```
+cool@cool:/workspace/git_test$ git log
+commit fb957de2cef371bb18e262f783db712343fac0e3
+Merge: 2320e1e e994603
+Author: yuancheng <330469102@qq.com>
+Date:   Fri Oct 28 10:51:48 2016 +0800
+
+    人肉做了合并
+
+commit e994603b36330cdafb81482aa1a67de8834b4ade
+Author: 小李 <xiao_li@qq.com>
+Date:   Fri Oct 28 10:42:18 2016 +0800
+
+    增加了作者信息: 小李
+
+commit 2320e1eec1bad5f8e1da23278a6a9582b4278aba
+Author: yuancheng <330469102@qq.com>
+Date:   Fri Oct 28 10:39:34 2016 +0800
+
+    第二行加上了 作者信息
+
+commit 099525404b46a0203f82acb3c183923ba13558a0
+Author: yuancheng <330469102@qq.com>
+Date:   Fri Oct 28 10:33:01 2016 +0800
+
+    第一次提交
+```
+
+
+小李在它那边就可以 git pull了:
+
+```
+cool@cool:/workspace/git_test_for_xiao_li$ git pull
+remote: Counting objects: 6, done.
+remote: Compressing objects: 100% (4/4), done.
+remote: Total 6 (delta 0), reused 6 (delta 0), pack-reused 0
+Unpacking objects: 100% (6/6), done.
+From https://github.com/fodcool/my_git_test
+   e994603..fb957de  master     -> origin/master
+Updating e994603..fb957de
+Fast-forward
+ apple.rb | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+cool@cool:/workspace/git_test_for_xiao_li$ git log
+commit fb957de2cef371bb18e262f783db712343fac0e3
+Merge: 2320e1e e994603
+Author: yuancheng <330469102@qq.com>
+Date:   Fri Oct 28 10:51:48 2016 +0800
+
+    人肉做了合并
+
+commit e994603b36330cdafb81482aa1a67de8834b4ade
+Author: 小李 <xiao_li@qq.com>
+Date:   Fri Oct 28 10:42:18 2016 +0800
+
+    增加了作者信息: 小李
+
+commit 2320e1eec1bad5f8e1da23278a6a9582b4278aba
+Author: yuancheng <330469102@qq.com>
+Date:   Fri Oct 28 10:39:34 2016 +0800
+
+    第二行加上了 作者信息
+
+commit 099525404b46a0203f82acb3c183923ba13558a0
+Author: yuancheng <330469102@qq.com>
+Date:   Fri Oct 28 10:33:01 2016 +0800
+
+    第一次提交
+```
 
 ## 提交代码 git add/commit/push
 
@@ -273,6 +601,21 @@ sg552@youku:/sg552/workspace/m-cms$ git branch -a
 
 显示本地和远程的origin 上的分支情况
 
+( git pull的过程, 例如: $ git pull origin master
+表示: 把远程的  `remotes/origin/master` 合并到 本地的 `master`
+git pull 分成两个动作:
+
+1. git fetch
+2. git merge
+
+)
+
+## git clone, git pull, git fetch 的区别
+
+clone: 本地没有这个代码时,使用.  (第一次获取代码,用clone)
+fetch: 只是把代码 从远程弄到本地, 但是不合并(无merge). 这个命令,用的极少.
+pull: 本地有代码仓库, 希望获取 远程的某个commit, 才用pull. 相当于 fetch + merge. (用的最多)
+
 ### 新建分支
 
 ```bash
@@ -343,6 +686,7 @@ sg552@youku:/sg552/workspace/m-cms$ git remote show origin
 
 ## git tag 基本操作
 
+作用: 把可读性不强的commit 号(a70cff) 改成:可读性强的 1.0
 ### 查看本地所有的tag
 
 ```bash
